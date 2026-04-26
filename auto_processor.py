@@ -1,3 +1,29 @@
+# ComfyUI 任务处理脚本
+# 设计思路：
+# 1. 架构设计：采用分层架构，将功能模块划分为配置类、服务类和处理器类
+# 2. 配置管理：通过ComfyUIConfig和APIConfig类管理服务地址配置
+# 3. 服务层：
+#    - ComfyUIClient：负责与ComfyUI服务交互，提交工作流和获取历史记录
+#    - TaskService：负责与API服务交互，获取任务列表、详情和更新任务状态
+#    - FileService：负责文件查找和管理
+# 4. 执行层：
+#    - WorkflowExecutor：负责执行工作流，替换文本节点内容
+#    - TaskProcessor：负责处理待处理任务和检查生产完成情况
+# 5. 工作流程：
+#    a. 处理待处理任务：
+#       - 获取状态为QUEUING的任务列表
+#       - 使用work_id获取任务详情
+#       - 执行工作流，替换文本节点内容
+#       - 获取ComfyUI返回的prompt_id
+#       - 使用prompt_id作为task_id更新任务状态为PRODUCING
+#    b. 检查生产完成情况：
+#       - 获取状态为PRODUCING的任务列表
+#       - 向ComfyUI请求任务状态
+#       - 处理完成的任务，上传生成的文件
+#       - 更新任务状态为COMPLETED
+# 6. 错误处理：添加了异常捕获和重试机制，确保脚本的稳定性
+# 7. 日志输出：添加了详细的日志输出，便于调试和监控
+
 import requests
 import json
 import time
@@ -76,107 +102,85 @@ class ComfyUIClient:
             pass
         return None
 
-class QueueService:
-    """队列服务"""
+class TaskService:
+    """任务服务"""
 
     @staticmethod
-    def get_public_list():
-        """获取公开队列列表"""
-        print("\n正在请求队列列表...")
+    def get_public_list(status=None):
+        """获取公开任务列表"""
+        print(f"\n正在请求任务列表，状态: {status}")
         try:
+            params = {}
+            if status:
+                params["status"] = status
+            
             response = requests.post(
-                f"{APIConfig.API_BASE_URL}/queue/public/list",
-                json={}
+                f"{APIConfig.API_BASE_URL}/task/public/list",
+                json=params
             )
             if response.status_code == 200:
                 data = response.json()
-                print(f"队列列表请求成功")
+                print(f"任务列表请求成功")
                 return data.get("data", {}).get("list", [])
         except Exception as e:
-            print(f"请求队列列表失败: {str(e)}")
+            print(f"请求任务列表失败: {str(e)}")
         return []
 
     @staticmethod
-    def get_public_detail(work_id):
-        """获取公开队列详情"""
-        print(f"正在请求作品详情 (work_id: {work_id})...")
+    def get_public_detail(identifier):
+        """获取公开任务详情"""
+        print(f"正在请求任务详情 (identifier: {identifier})...")
         try:
+            # 构建请求参数，使用identifier作为work_id查询
+            params = {}
+            if identifier:
+                params["work_id"] = identifier
+            
             response = requests.post(
-                f"{APIConfig.API_BASE_URL}/queue/public/detail",
-                json={"work_id": work_id}
+                f"{APIConfig.API_BASE_URL}/task/public/detail",
+                json=params
             )
             if response.status_code == 200:
                 return response.json()
         except Exception as e:
-            print(f"请求详情失败: {str(e)}")
+            print(f"请求任务详情失败: {str(e)}")
         return None
 
-class ProductionService:
-    """生产服务"""
-
     @staticmethod
-    def create(queue_id, work_id, status):
-        """创建生产记录"""
-        print(f"\n正在创建生产记录... queue_id: {queue_id}, status: {status}")
+    def update_public(task_id, work_id, status):
+        """更新公开任务状态和ID"""
+        print(f"\n正在更新任务状态和ID... task_id: {task_id}, work_id: {work_id}, status: {status}")
         try:
             response = requests.post(
-                f"{APIConfig.API_BASE_URL}/production/create",
+                f"{APIConfig.API_BASE_URL}/task/public/update",
                 json={
-                    "queue_id": str(queue_id),
+                    "task_id": str(task_id),
                     "work_id": work_id,
                     "status": status
                 }
             )
             if response.status_code == 200:
                 result = response.json()
-                print(f"生产记录创建成功")
+                print(f"任务状态和ID更新成功")
                 return result
             else:
-                print(f"生产记录创建失败: {response.status_code}")
+                print(f"任务状态和ID更新失败: {response.status_code}")
         except Exception as e:
-            print(f"创建生产记录时出错: {str(e)}")
+            print(f"更新任务状态和ID时出错: {str(e)}")
         return None
 
-    @staticmethod
-    def get_public_list(status):
-        """获取公开生产列表"""
-        print(f"\n正在查询生产状态列表，状态: {status}")
-        try:
-            response = requests.post(
-                f"{APIConfig.API_BASE_URL}/production/public/list",
-                json={"status": status}
-            )
-            if response.status_code == 200:
-                return response.json()
-        except Exception as e:
-            print(f"查询生产列表失败: {str(e)}")
-        return None
+
 
     @staticmethod
-    def get_public_detail(queue_id):
-        """获取公开生产详情"""
-        print(f"\n正在查询生产详情，queue_id: {queue_id}")
-        try:
-            response = requests.post(
-                f"{APIConfig.API_BASE_URL}/production/public/detail",
-                json={"queue_id": queue_id}
-            )
-            if response.status_code == 200:
-                return response.json()
-        except Exception as e:
-            print(f"查询详情失败: {str(e)}")
-        return None
-
-    @staticmethod
-    def upload(work_id, queue_id, file_path):
+    def upload(work_id, task_id, file_path):
         """上传文件"""
-        print(f"\n正在上传文件... work_id: {work_id}, queue_id: {queue_id}")
+        print(f"\n正在上传文件... work_id: {work_id}, task_id: {task_id}")
         try:
             with open(file_path, 'rb') as f:
                 files = {'file': f}
-                data = {'work_id': work_id, 'queue_id': queue_id}
+                data = {'work_id': work_id, 'task_id': task_id}
                 response = requests.post(
-                    f"{APIConfig.API_BASE_URL}/production/upload",
+                    f"{APIConfig.API_BASE_URL}/task/upload",
                     files=files,
                     data=data
                 )
@@ -235,14 +239,15 @@ class WorkflowExecutor:
         if not detail_data or not detail_data.get("data"):
             return None
 
-        creation = detail_data["data"].get("creation")
+        task = detail_data["data"].get("task")
+        work = detail_data["data"].get("work")
         models = detail_data["data"].get("models")
 
-        if not creation or not models:
+        if not task or not work or not models:
             return None
 
-        content = creation.get("content")
-        work_id = creation.get("creation_id")
+        content = work.get("content")
+        work_id = work.get("work_id")
 
         if not content:
             return None
@@ -257,7 +262,12 @@ class WorkflowExecutor:
                 continue
 
             try:
-                workflow_data = json.loads(config_info)
+                # 处理config_info，可能是字符串或对象
+                if isinstance(config_info, str):
+                    workflow_data = json.loads(config_info)
+                else:
+                    workflow_data = config_info
+                
                 updated_workflow = WorkflowExecutor.find_and_replace_text_node(workflow_data, content)
 
                 if updated_workflow:
@@ -268,7 +278,8 @@ class WorkflowExecutor:
                         return {
                             "prompt_id": prompt_id,
                             "work_id": work_id,
-                            "content": content
+                            "content": content,
+                            "original_task_id": task.get("task_id")
                         }
             except json.JSONDecodeError as e:
                 print(f"解析配置信息失败: {str(e)}")
@@ -302,32 +313,39 @@ class TaskProcessor:
     def process_pending_queue():
         """处理待制造的队列"""
         print("\n" + "="*50)
-        print("步骤1: 处理待制造的队列")
+        print("步骤1: 处理待处理的任务")
         print("="*50)
 
-        queue_list = QueueService.get_public_list()
-        if not queue_list:
-            print("没有待处理的队列")
+        task_list = TaskService.get_public_list("QUEUING")
+        if not task_list:
+            print("没有待处理的任务")
             return
 
-        print(f"找到 {len(queue_list)} 个待处理的队列")
+        print(f"找到 {len(task_list)} 个待处理的任务")
 
-        for item in queue_list:
+        for item in task_list:
             work_id = item.get("work_id")
+            
+            # 待处理的任务task_id为空，使用work_id获取详情
             if not work_id:
                 continue
 
-            detail = QueueService.get_public_detail(work_id)
+            # 使用work_id获取详情
+            detail = TaskService.get_public_detail(work_id)
+            
             if not detail:
                 continue
 
             result = WorkflowExecutor.execute_from_detail(detail)
-            if result and result.get("prompt_id"):
-                ProductionService.create(
-                    result["prompt_id"],
-                    result["work_id"],
-                    "PRODUCING"
-                )
+            if result:
+                # 获取ComfyUI返回的prompt_id
+                new_task_id = result.get("prompt_id")
+                # 获取work_id
+                work_id = result.get("work_id")
+                
+                if new_task_id and work_id:
+                    # 使用prompt_id作为task_id更新任务状态为PRODUCING
+                    TaskService.update_public(new_task_id, work_id, "PRODUCING")
 
     @staticmethod
     def check_production_completion():
@@ -336,12 +354,8 @@ class TaskProcessor:
         print("步骤2: 检查生产完成情况")
         print("="*50)
 
-        production_list = ProductionService.get_public_list("PRODUCING")
-        if not production_list or not production_list.get("data"):
-            print("没有生产中的任务")
-            return
-
-        items = production_list["data"].get("list", [])
+        # 从数据库获取生产中的任务列表
+        items = TaskService.get_public_list("PRODUCING")
         if not items:
             print("没有生产中的任务")
             return
@@ -349,29 +363,25 @@ class TaskProcessor:
         print(f"找到 {len(items)} 个生产中的任务")
 
         for item in items:
-            queue_id = item.get("queue_id")
+            task_id = item.get("task_id")
             work_id = item.get("work_id")
 
-            if not queue_id:
+            if not task_id:
                 continue
 
-            # 查询详情
-            detail = ProductionService.get_public_detail(queue_id)
-            if not detail or not detail.get("data"):
+            # 向ComfyUI请求任务状态
+            print(f"向ComfyUI查询任务状态: {task_id}")
+            history = ComfyUIClient.get_history(task_id)
+            if not history or task_id not in history:
                 continue
 
-            # 查询ComfyUI任务状态
-            history = ComfyUIClient.get_history(queue_id)
-            if not history or queue_id not in history:
-                continue
-
-            task_history = history[queue_id]
+            task_history = history[task_id]
             outputs = task_history.get('outputs', {})
 
             if not outputs:
                 continue
 
-            print(f"任务 {queue_id} 已完成，找到输出")
+            print(f"任务 {task_id} 已完成，找到输出")
 
             # 处理输出文件
             for node_id, node_output in outputs.items():
@@ -385,9 +395,11 @@ class TaskProcessor:
 
                     file_path = FileService.find_file(filename)
                     if file_path:
-                        success, result = ProductionService.upload(work_id, queue_id, file_path)
+                        success, result = TaskService.upload(work_id, task_id, file_path)
                         if success:
                             print(f"文件上传成功")
+                            # 更新任务状态为COMPLETED
+                            TaskService.update_public(task_id, work_id, "COMPLETED")
 
 def run_cycle():
     """执行一次循环"""
