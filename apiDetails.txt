@@ -1,0 +1,11 @@
+端点 方法 功能
+ /api/test_comfy            GET 测试 ComfyUI 连接
+ /api/workflows             GET 列出所有工作流
+ /api/workflow/<workflow_name>          POST 运行指定工作流
+ /api/history           GET 获取所有历史记录
+ /api/history/<prompt_id>           GET 获取指定任务历史
+ /api/image/<prompt_id>             GET 获取生成的图片
+ /api/workflow          POST 提交工作流到 ComfyUI
+ /api/status            GET 获取系统状态
+ /api/view_queue            GET 查看队列状态
+ /api/task_status/<prompt_id>           GET 检查任务状态

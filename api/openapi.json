@@ -1,0 +1,5883 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "TextToImageAndVideo API",
+    "description": "Flask后端API项目，用于文本转图片和视频应用",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:5000",
+      "description": "本地开发服务器"
+    }
+  ],
+  "tags": [
+    {
+      "name": "系统",
+      "description": "系统相关接口"
+    },
+    {
+      "name": "认证",
+      "description": "认证相关接口"
+    },
+    {
+      "name": "用户",
+      "description": "用户相关接口"
+    },
+    {
+      "name": "积分",
+      "description": "积分相关接口"
+    },
+    {
+      "name": "作品",
+      "description": "作品相关接口"
+    },
+    {
+      "name": "收藏",
+      "description": "收藏相关接口"
+    },
+    {
+      "name": "创作",
+      "description": "创作相关接口"
+    },
+    {
+      "name": "队列",
+      "description": "队列相关接口"
+    },
+    {
+      "name": "素材",
+      "description": "素材相关接口"
+    },
+    {
+      "name": "AI模型配置",
+      "description": "AI大模型配置相关接口"
+    },
+    {
+      "name": "充值",
+      "description": "充值相关接口"
+    },
+    {
+      "name": "生产",
+      "description": "生产相关接口"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "首页",
+        "description": "返回API运行状态信息",
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "database": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "系统"
+        ]
+      }
+    },
+    "/db-status": {
+      "get": {
+        "summary": "数据库连接状态",
+        "description": "检测并返回数据库连接状态",
+        "responses": {
+          "200": {
+            "description": "数据库连接正常",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "database": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "数据库连接失败",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "database": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "系统"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "用户登录",
+        "description": "用户登录获取访问令牌",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "登录成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "账号或密码错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "认证"
+        ]
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "summary": "刷新令牌",
+        "description": "使用刷新令牌获取新的访问令牌",
+        "responses": {
+          "200": {
+            "description": "刷新成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "刷新令牌无效",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "认证"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "用户登出",
+        "description": "用户登出，清除令牌",
+        "responses": {
+          "200": {
+            "description": "登出成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogoutResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "认证"
+        ]
+      }
+    },
+    "/user/create": {
+      "post": {
+        "summary": "创建用户",
+        "description": "创建新用户",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "account",
+                  "password"
+                ],
+                "properties": {
+                  "account": {
+                    "type": "string",
+                    "description": "用户账号"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "密码"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "description": "手机号"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "邮箱"
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "description": "头像URL"
+                  },
+                  "user_type": {
+                    "type": "string",
+                    "enum": [
+                      "NORMAL",
+                      "ADMIN",
+                      "SUPER_ADMIN"
+                    ],
+                    "description": "用户类型"
+                  },
+                  "extra_info": {
+                    "type": "string",
+                    "description": "其他信息"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "用户创建成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "用户"
+        ]
+      }
+    },
+    "/user/list": {
+      "post": {
+        "summary": "查询用户列表",
+        "description": "分页查询用户列表",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "page": {
+                    "type": "integer",
+                    "description": "页码",
+                    "default": 1
+                  },
+                  "page_size": {
+                    "type": "integer",
+                    "description": "每页数量",
+                    "default": 10
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "查询成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserListResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "用户"
+        ]
+      }
+    },
+    "/user/detail": {
+      "post": {
+        "summary": "查询用户详情",
+        "description": "根据ID或UUID查询用户详情",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "用户ID（优先）"
+                  },
+                  "uuid": {
+                    "type": "string",
+                    "description": "用户UUID（备选）"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "查询成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "用户不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "用户"
+        ]
+      }
+    },
+    "/user/update": {
+      "post": {
+        "summary": "更新用户信息",
+        "description": "更新用户信息",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "用户ID"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "description": "手机号"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "邮箱"
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "description": "头像URL"
+                  },
+                  "user_type": {
+                    "type": "string",
+                    "enum": [
+                      "NORMAL",
+                      "ADMIN",
+                      "SUPER_ADMIN"
+                    ],
+                    "description": "用户类型"
+                  },
+                  "extra_info": {
+                    "type": "string",
+                    "description": "其他信息"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "用户更新成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "用户不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "用户"
+        ]
+      }
+    },
+    "/user/delete": {
+      "post": {
+        "summary": "删除用户",
+        "description": "软删除用户",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "用户ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "用户删除成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "用户不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "用户"
+        ]
+      }
+    },
+    "/point/create": {
+      "post": {
+        "summary": "创建积分记录",
+        "description": "创建用户积分记录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "user_uuid",
+                  "point_value"
+                ],
+                "properties": {
+                  "user_uuid": {
+                    "type": "string",
+                    "description": "用户UUID"
+                  },
+                  "point_value": {
+                    "type": "number",
+                    "description": "积分值"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "积分记录创建成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PointResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "用户不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "积分"
+        ]
+      }
+    },
+    "/point/list": {
+      "post": {
+        "summary": "查询积分记录列表",
+        "description": "分页查询积分记录列表",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user_uuid": {
+                    "type": "string",
+                    "description": "用户UUID（可选）"
+                  },
+                  "page": {
+                    "type": "integer",
+                    "description": "页码",
+                    "default": 1
+                  },
+                  "page_size": {
+                    "type": "integer",
+                    "description": "每页数量",
+                    "default": 10
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "查询成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PointListResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "积分"
+        ]
+      }
+    },
+    "/point/detail": {
+      "post": {
+        "summary": "查询积分记录详情",
+        "description": "根据ID查询积分记录详情",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "积分记录ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "查询成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PointResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "积分记录不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "积分"
+        ]
+      }
+    },
+    "/point/update": {
+      "post": {
+        "summary": "更新积分记录",
+        "description": "更新积分记录信息",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "积分记录ID"
+                  },
+                  "point_value": {
+                    "type": "number",
+                    "description": "积分值"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "积分记录更新成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PointResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "积分记录不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "积分"
+        ]
+      }
+    },
+    "/point/delete": {
+      "post": {
+        "summary": "删除积分记录",
+        "description": "软删除积分记录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "积分记录ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "积分记录删除成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "积分记录不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "积分"
+        ]
+      }
+    },
+    "/work/create": {
+      "post": {
+        "summary": "创建作品",
+        "description": "创建新作品",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "user_uuid",
+                  "result_info"
+                ],
+                "properties": {
+                  "work_id": {
+                    "type": "string",
+                    "description": "作品ID（可选，不提供则自动生成）"
+                  },
+                  "user_uuid": {
+                    "type": "string",
+                    "description": "用户UUID"
+                  },
+                  "result_info": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "作品成果信息"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "NOT_MADE",
+                      "MAKING",
+                      "COMPLETED",
+                      "FAILED",
+                      "DELETED"
+                    ],
+                    "description": "作品状态"
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "作品标签"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "作品创建成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "用户不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "作品"
+        ]
+      }
+    },
+    "/work/list": {
+      "post": {
+        "summary": "查询作品列表",
+        "description": "分页查询作品列表",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user_uuid": {
+                    "type": "string",
+                    "description": "用户UUID"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "NOT_MADE",
+                      "MAKING",
+                      "COMPLETED",
+                      "FAILED",
+                      "DELETED"
+                    ],
+                    "description": "作品状态"
+                  },
+                  "page": {
+                    "type": "integer",
+                    "description": "页码",
+                    "default": 1
+                  },
+                  "page_size": {
+                    "type": "integer",
+                    "description": "每页数量",
+                    "default": 10
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "查询成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkListResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "作品"
+        ]
+      }
+    },
+    "/work/detail": {
+      "post": {
+        "summary": "查询作品详情",
+        "description": "根据ID查询作品详情",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "作品内部ID"
+                  },
+                  "work_id": {
+                    "type": "string",
+                    "description": "作品外部ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "查询成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "作品不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "作品"
+        ]
+      }
+    },
+    "/work/update": {
+      "post": {
+        "summary": "更新作品",
+        "description": "更新作品信息",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "作品内部ID"
+                  },
+                  "result_info": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "作品成果信息"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "NOT_MADE",
+                      "MAKING",
+                      "COMPLETED",
+                      "FAILED",
+                      "DELETED"
+                    ],
+                    "description": "作品状态"
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "作品标签"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "作品更新成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "作品不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "作品"
+        ]
+      }
+    },
+    "/work/delete": {
+      "post": {
+        "summary": "删除作品",
+        "description": "软删除作品",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "作品内部ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "作品删除成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "作品不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "作品"
+        ]
+      }
+    },
+    "/collection/create": {
+      "post": {
+        "summary": "创建收藏",
+        "description": "创建新收藏",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "user_uuid"
+                ],
+                "properties": {
+                  "user_uuid": {
+                    "type": "string",
+                    "description": "用户UUID"
+                  },
+                  "work_id": {
+                    "type": "string",
+                    "description": "作品ID（可选，不提供则自动生成）"
+                  },
+                  "collection_type": {
+                    "type": "string",
+                    "enum": [
+                      "VIDEO",
+                      "IMAGE",
+                      "MODEL",
+                      "PROMPT",
+                      "OTHER"
+                    ],
+                    "description": "收藏类型"
+                  },
+                  "is_collected": {
+                    "type": "integer",
+                    "description": "是否收藏(0-未收藏,1-已收藏)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "收藏创建成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "收藏"
+        ]
+      }
+    },
+    "/collection/list": {
+      "post": {
+        "summary": "查询收藏列表",
+        "description": "分页查询收藏列表",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user_uuid": {
+                    "type": "string",
+                    "description": "用户UUID"
+                  },
+                  "work_id": {
+                    "type": "string",
+                    "description": "作品ID"
+                  },
+                  "collection_type": {
+                    "type": "string",
+                    "enum": [
+                      "VIDEO",
+                      "IMAGE",
+                      "MODEL",
+                      "PROMPT",
+                      "OTHER"
+                    ],
+                    "description": "收藏类型"
+                  },
+                  "is_collected": {
+                    "type": "integer",
+                    "description": "是否收藏"
+                  },
+                  "page": {
+                    "type": "integer",
+                    "description": "页码",
+                    "default": 1
+                  },
+                  "page_size": {
+                    "type": "integer",
+                    "description": "每页数量",
+                    "default": 10
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "查询成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionListResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "收藏"
+        ]
+      }
+    },
+    "/collection/detail": {
+      "post": {
+        "summary": "查询收藏详情",
+        "description": "根据ID查询收藏详情",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "收藏内部ID"
+                  },
+                  "user_uuid": {
+                    "type": "string",
+                    "description": "用户UUID"
+                  },
+                  "work_id": {
+                    "type": "string",
+                    "description": "作品ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "查询成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "收藏不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "收藏"
+        ]
+      }
+    },
+    "/collection/update": {
+      "post": {
+        "summary": "更新收藏",
+        "description": "更新收藏状态",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "收藏内部ID"
+                  },
+                  "user_uuid": {
+                    "type": "string",
+                    "description": "用户UUID"
+                  },
+                  "is_collected": {
+                    "type": "integer",
+                    "description": "是否收藏(0-未收藏,1-已收藏)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "收藏更新成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "收藏不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "收藏"
+        ]
+      }
+    },
+    "/collection/delete": {
+      "post": {
+        "summary": "删除收藏",
+        "description": "软删除收藏",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "收藏内部ID"
+                  },
+                  "user_uuid": {
+                    "type": "string",
+                    "description": "用户UUID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "收藏删除成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "收藏不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "收藏"
+        ]
+      }
+    },
+    "/creation/create": {
+      "post": {
+        "summary": "创建创造",
+        "description": "创建新创造",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "user_uuid",
+                  "points_consumed"
+                ],
+                "properties": {
+                  "user_uuid": {
+                    "type": "string",
+                    "description": "用户UUID"
+                  },
+                  "creation_id": {
+                    "type": "string",
+                    "description": "作品ID（可选，不提供则自动生成）"
+                  },
+                  "points_consumed": {
+                    "type": "number",
+                    "description": "消耗积分值"
+                  },
+                  "models": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "模型信息"
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "创造文本内容"
+                  },
+                  "extra_info": {
+                    "type": "string",
+                    "description": "其他信息"
+                  },
+                  "creation_type": {
+                    "type": "string",
+                    "enum": [
+                      "TEXT",
+                      "VIDEO",
+                      "COPYWRITING",
+                      "OTHER"
+                    ],
+                    "description": "创作类型"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "QUEUING",
+                      "CREATING",
+                      "COMPLETED",
+                      "CANCELED",
+                      "INVALID"
+                    ],
+                    "description": "作品状态"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "创造创建成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "创作"
+        ]
+      }
+    },
+    "/creation/list": {
+      "post": {
+        "summary": "查询创造列表",
+        "description": "分页查询创造列表",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user_uuid": {
+                    "type": "string",
+                    "description": "用户UUID"
+                  },
+                  "creation_type": {
+                    "type": "string",
+                    "enum": [
+                      "TEXT",
+                      "VIDEO",
+                      "COPYWRITING",
+                      "OTHER"
+                    ],
+                    "description": "创作类型"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "QUEUING",
+                      "CREATING",
+                      "COMPLETED",
+                      "CANCELED",
+                      "INVALID"
+                    ],
+                    "description": "作品状态"
+                  },
+                  "time_tag": {
+                    "type": "string",
+                    "description": "时间标签"
+                  },
+                  "page": {
+                    "type": "integer",
+                    "description": "页码",
+                    "default": 1
+                  },
+                  "page_size": {
+                    "type": "integer",
+                    "description": "每页数量",
+                    "default": 10
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "查询成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreationListResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "创作"
+        ]
+      }
+    },
+    "/creation/detail": {
+      "post": {
+        "summary": "查询创造详情",
+        "description": "根据ID查询创造详情",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "创造内部ID"
+                  },
+                  "user_uuid": {
+                    "type": "string",
+                    "description": "用户UUID"
+                  },
+                  "creation_id": {
+                    "type": "string",
+                    "description": "作品ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "查询成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "创造不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "创作"
+        ]
+      }
+    },
+    "/creation/update": {
+      "post": {
+        "summary": "更新创造",
+        "description": "更新创造信息",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "创造内部ID"
+                  },
+                  "user_uuid": {
+                    "type": "string",
+                    "description": "用户UUID"
+                  },
+                  "points_consumed": {
+                    "type": "number",
+                    "description": "消耗积分值"
+                  },
+                  "models": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "模型信息"
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "创造文本内容"
+                  },
+                  "extra_info": {
+                    "type": "string",
+                    "description": "其他信息"
+                  },
+                  "creation_type": {
+                    "type": "string",
+                    "enum": [
+                      "TEXT",
+                      "VIDEO",
+                      "COPYWRITING",
+                      "OTHER"
+                    ],
+                    "description": "创作类型"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "QUEUING",
+                      "CREATING",
+                      "COMPLETED",
+                      "CANCELED",
+                      "INVALID"
+                    ],
+                    "description": "作品状态"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "创造更新成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "创造不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "创作"
+        ]
+      }
+    },
+    "/creation/delete": {
+      "post": {
+        "summary": "删除创造",
+        "description": "软删除创造",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "创造内部ID"
+                  },
+                  "user_uuid": {
+                    "type": "string",
+                    "description": "用户UUID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "创造删除成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "创造不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "创作"
+        ]
+      }
+    },
+    "/queue/create": {
+      "post": {
+        "summary": "创建队列",
+        "description": "创建新队列",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "work_id"
+                ],
+                "properties": {
+                  "work_id": {
+                    "type": "string",
+                    "description": "作品ID"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "CREATING",
+                      "FAILED"
+                    ],
+                    "description": "制造状态"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "队列创建成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "队列"
+        ]
+      }
+    },
+    "/queue/list": {
+      "post": {
+        "summary": "查询队列列表",
+        "description": "分页查询队列列表",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "work_id": {
+                    "type": "string",
+                    "description": "作品ID"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "CREATING",
+                      "FAILED"
+                    ],
+                    "description": "制造状态"
+                  },
+                  "page": {
+                    "type": "integer",
+                    "description": "页码",
+                    "default": 1
+                  },
+                  "page_size": {
+                    "type": "integer",
+                    "description": "每页数量",
+                    "default": 10
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "查询成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueListResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "队列"
+        ]
+      }
+    },
+    "/queue/detail": {
+      "post": {
+        "summary": "查询队列详情",
+        "description": "根据ID查询队列详情",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "队列内部ID"
+                  },
+                  "work_id": {
+                    "type": "string",
+                    "description": "作品ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "查询成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "队列不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "队列"
+        ]
+      }
+    },
+    "/queue/update": {
+      "post": {
+        "summary": "更新队列",
+        "description": "更新队列状态",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "队列内部ID"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "CREATING",
+                      "FAILED"
+                    ],
+                    "description": "制造状态"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "队列更新成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "队列不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "队列"
+        ]
+      }
+    },
+    "/queue/delete": {
+      "post": {
+        "summary": "删除队列",
+        "description": "软删除队列",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "队列内部ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "队列删除成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "队列不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "队列"
+        ]
+      }
+    },
+    "/material/create": {
+      "post": {
+        "summary": "创建素材上传",
+        "description": "创建新素材上传",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "user_uuid",
+                  "material_address"
+                ],
+                "properties": {
+                  "user_uuid": {
+                    "type": "string",
+                    "description": "用户UUID"
+                  },
+                  "material_address": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "素材地址"
+                  },
+                  "request_id": {
+                    "type": "string",
+                    "description": "请求ID（可选，不提供则自动生成）"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "素材上传成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaterialResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "用户不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "素材"
+        ]
+      }
+    },
+    "/material/list": {
+      "post": {
+        "summary": "查询素材上传列表",
+        "description": "分页查询素材上传列表",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user_uuid": {
+                    "type": "string",
+                    "description": "用户UUID"
+                  },
+                  "page": {
+                    "type": "integer",
+                    "description": "页码",
+                    "default": 1
+                  },
+                  "page_size": {
+                    "type": "integer",
+                    "description": "每页数量",
+                    "default": 10
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "查询成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaterialListResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "素材"
+        ]
+      }
+    },
+    "/material/detail": {
+      "post": {
+        "summary": "查询素材上传详情",
+        "description": "根据ID查询素材上传详情",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "素材上传内部ID"
+                  },
+                  "request_id": {
+                    "type": "string",
+                    "description": "请求ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "查询成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaterialResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "素材上传不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "素材"
+        ]
+      }
+    },
+    "/material/delete": {
+      "post": {
+        "summary": "删除素材上传",
+        "description": "软删除素材上传",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "素材上传内部ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "素材上传删除成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "素材上传不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "素材"
+        ]
+      }
+    },
+    "/ai-model/create": {
+      "post": {
+        "summary": "创建AI大模型配置",
+        "description": "创建新的AI大模型配置（管理员）",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "model_name",
+                  "model_type"
+                ],
+                "properties": {
+                  "model_name": {
+                    "type": "string",
+                    "description": "大模型名称"
+                  },
+                  "model_type": {
+                    "type": "string",
+                    "enum": [
+                      "TEXT_TO_IMAGE",
+                      "IMAGE_TO_IMAGE",
+                      "TEXT_TO_VIDEO",
+                      "IMAGE_TO_VIDEO",
+                      "TEXT_TO_TEXT",
+                      "OTHER"
+                    ],
+                    "description": "大模型类型"
+                  },
+                  "config_info": {
+                    "type": "object",
+                    "description": "大模型配置信息"
+                  },
+                  "workflow": {
+                    "type": "string",
+                    "description": "工作流名称"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "创建成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIModelResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "AI模型配置"
+        ]
+      }
+    },
+    "/ai-model/list": {
+      "post": {
+        "summary": "查询AI大模型配置列表",
+        "description": "分页查询AI大模型配置列表（管理员）",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "model_type": {
+                    "type": "string",
+                    "enum": [
+                      "TEXT_TO_IMAGE",
+                      "IMAGE_TO_IMAGE",
+                      "TEXT_TO_VIDEO",
+                      "IMAGE_TO_VIDEO",
+                      "TEXT_TO_TEXT",
+                      "OTHER"
+                    ],
+                    "description": "大模型类型"
+                  },
+                  "page": {
+                    "type": "integer",
+                    "description": "页码",
+                    "default": 1
+                  },
+                  "page_size": {
+                    "type": "integer",
+                    "description": "每页数量",
+                    "default": 10
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "查询成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIModelListResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "AI模型配置"
+        ]
+      }
+    },
+    "/ai-model/detail": {
+      "post": {
+        "summary": "查询AI大模型配置详情",
+        "description": "根据ID查询AI大模型配置详情（管理员）",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "AI大模型配置ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "查询成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIModelResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "AI大模型配置不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "AI模型配置"
+        ]
+      }
+    },
+    "/ai-model/update": {
+      "post": {
+        "summary": "更新AI大模型配置",
+        "description": "更新AI大模型配置信息（管理员）",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "AI大模型配置ID"
+                  },
+                  "model_name": {
+                    "type": "string",
+                    "description": "大模型名称"
+                  },
+                  "model_type": {
+                    "type": "string",
+                    "enum": [
+                      "TEXT_TO_IMAGE",
+                      "IMAGE_TO_IMAGE",
+                      "TEXT_TO_VIDEO",
+                      "IMAGE_TO_VIDEO",
+                      "TEXT_TO_TEXT",
+                      "OTHER"
+                    ],
+                    "description": "大模型类型"
+                  },
+                  "config_info": {
+                    "type": "object",
+                    "description": "大模型配置信息"
+                  },
+                  "workflow": {
+                    "type": "string",
+                    "description": "工作流名称"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "更新成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIModelResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "AI大模型配置不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "AI模型配置"
+        ]
+      }
+    },
+    "/ai-model/delete": {
+      "post": {
+        "summary": "删除AI大模型配置",
+        "description": "软删除AI大模型配置（管理员）",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "AI大模型配置ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "删除成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "AI大模型配置不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "AI模型配置"
+        ]
+      }
+    },
+    "/ai-model/types": {
+      "get": {
+        "summary": "获取AI大模型类型枚举",
+        "description": "获取AI大模型类型枚举列表（管理员）",
+        "responses": {
+          "200": {
+            "description": "查询成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AIModelTypesResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "AI模型配置"
+        ]
+      }
+    },
+    "/production/create": {
+      "post": {
+        "summary": "创建生产记录",
+        "description": "无需认证，创建新的生产记录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "queue_id",
+                  "work_id"
+                ],
+                "properties": {
+                  "queue_id": {
+                    "type": "string",
+                    "description": "队列ID"
+                  },
+                  "work_id": {
+                    "type": "string",
+                    "description": "作品ID"
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "生产状态",
+                    "enum": [
+                      "PRODUCING",
+                      "COMPLETED",
+                      "FAILED"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "创建成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Production"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "生产"
+        ]
+      }
+    },
+    "/production/update": {
+      "post": {
+        "summary": "更新生产记录",
+        "description": "无需认证，更新生产记录信息",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "生产ID"
+                  },
+                  "queue_id": {
+                    "type": "string",
+                    "description": "队列ID"
+                  },
+                  "work_id": {
+                    "type": "string",
+                    "description": "作品ID"
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "生产状态",
+                    "enum": [
+                      "PRODUCING",
+                      "COMPLETED",
+                      "FAILED"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "更新成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Production"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "生产记录不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "生产"
+        ]
+      }
+    },
+    "/production/delete": {
+      "post": {
+        "summary": "删除生产记录",
+        "description": "无需认证，删除生产记录（软删除）",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "生产ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "删除成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "生产记录不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "生产"
+        ]
+      }
+    },
+    "/recharge/create": {
+      "post": {
+        "path": "/recharge/create",
+        "method": "POST",
+        "summary": "创建充值记录",
+        "description": "创建新的用户充值记录",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RechargeCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "创建成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "创建充值记录成功"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/RechargeResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "缺少必要字段"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "创建充值记录失败"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "充值"
+        ]
+      }
+    },
+    "/recharge/list": {
+      "post": {
+        "path": "/recharge/list",
+        "method": "POST",
+        "summary": "查询充值记录列表",
+        "description": "根据条件查询充值记录列表",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RechargeListRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "查询成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "查询充值记录列表成功"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/RechargeListResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "查询充值记录列表失败"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "充值"
+        ]
+      }
+    },
+    "/recharge/detail": {
+      "post": {
+        "path": "/recharge/detail",
+        "method": "POST",
+        "summary": "查询充值记录详情",
+        "description": "根据ID查询充值记录详情",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RechargeDetailRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "查询成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "查询充值记录详情成功"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/RechargeResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "缺少必要字段: id"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "充值记录不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "充值记录不存在"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "查询充值记录详情失败"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "充值"
+        ]
+      }
+    },
+    "/recharge/delete": {
+      "post": {
+        "path": "/recharge/delete",
+        "method": "POST",
+        "summary": "删除充值记录",
+        "description": "根据ID删除充值记录（软删除）",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RechargeDeleteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "删除成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "删除充值记录成功"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "integer",
+                      "example": 400
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "缺少必要字段: id"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "充值记录不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "integer",
+                      "example": 404
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "充值记录不存在"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "integer",
+                      "example": 500
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "删除充值记录失败"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "充值"
+        ]
+      }
+    },
+    "/queue/public/list": {
+      "post": {
+        "summary": "公开查询待制造状态队列列表",
+        "description": "无需认证，返回所有待制造状态的队列信息",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "查询成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "list": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Queue"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "队列"
+        ]
+      }
+    },
+    "/queue/public/detail": {
+      "post": {
+        "summary": "公开查询作品详情",
+        "description": "无需认证，根据作品ID查询创造详情信息，包括创造文本内容、模型信息，以及对应的模型配置信息",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "work_id"
+                ],
+                "properties": {
+                  "work_id": {
+                    "type": "string",
+                    "description": "作品ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "查询成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "creation": {
+                          "$ref": "#/components/schemas/Creation"
+                        },
+                        "models": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/AIModel"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "作品不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "队列"
+        ]
+      }
+    },
+    "/production/public/list": {
+      "post": {
+        "summary": "公开查询生产状态列表",
+        "description": "无需认证，返回生产状态列表",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "description": "生产状态筛选"
+                  },
+                  "work_id": {
+                    "type": "string",
+                    "description": "作品ID筛选"
+                  },
+                  "queue_id": {
+                    "type": "string",
+                    "description": "队列ID筛选"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "查询成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "list": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Production"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "生产"
+        ]
+      }
+    },
+    "/production/public/detail": {
+      "post": {
+        "summary": "公开查询生产详情",
+        "description": "无需认证，根据生产ID查询生产详情信息",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "description": "生产ID"
+                  },
+                  "work_id": {
+                    "type": "string",
+                    "description": "作品ID"
+                  },
+                  "queue_id": {
+                    "type": "string",
+                    "description": "队列ID"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "查询成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Production"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "生产记录不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "生产"
+        ]
+      }
+    },
+    "/production/upload": {
+      "post": {
+        "summary": "文件上传接口",
+        "description": "无需认证，上传文件到生产目录（图片、视频、音频等）",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "work_id": {
+                    "type": "string",
+                    "description": "作品ID"
+                  },
+                  "queue_id": {
+                    "type": "string",
+                    "description": "队列ID"
+                  },
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "文件（图片、视频、音频等）"
+                  }
+                },
+                "required": [
+                  "work_id",
+                  "queue_id",
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "上传成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "file_path": {
+                          "type": "string",
+                          "description": "文件相对路径"
+                        },
+                        "file_url": {
+                          "type": "string",
+                          "description": "文件访问URL"
+                        },
+                        "original_filename": {
+                          "type": "string",
+                          "description": "原始文件名"
+                        },
+                        "file_size": {
+                          "type": "integer",
+                          "description": "文件大小（字节）"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "请求参数错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "服务器错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "生产"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "内部主键"
+          },
+          "uuid": {
+            "type": "string",
+            "description": "用户唯一标识(UUID)"
+          },
+          "phone": {
+            "type": "string",
+            "description": "手机号"
+          },
+          "account": {
+            "type": "string",
+            "description": "用户账号"
+          },
+          "password_hash": {
+            "type": "string",
+            "description": "密码(SHA-256加密)"
+          },
+          "email": {
+            "type": "string",
+            "description": "邮箱"
+          },
+          "avatar": {
+            "type": "string",
+            "description": "头像URL"
+          },
+          "user_type": {
+            "type": "string",
+            "description": "用户类型"
+          },
+          "extra_info": {
+            "type": "string",
+            "description": "其他信息"
+          },
+          "is_deleted": {
+            "type": "integer",
+            "description": "软删除标记"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "创建时间(毫秒时间戳)"
+          },
+          "updated_at": {
+            "type": "integer",
+            "description": "更新时间(毫秒时间戳)"
+          }
+        }
+      },
+      "SystemConfig": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "内部主键"
+          },
+          "config_key": {
+            "type": "string",
+            "description": "配置键"
+          },
+          "config_value": {
+            "type": "string",
+            "description": "配置值"
+          },
+          "config_type": {
+            "type": "string",
+            "description": "配置类型"
+          },
+          "description": {
+            "type": "string",
+            "description": "配置描述"
+          },
+          "is_public": {
+            "type": "boolean",
+            "description": "是否公开给前端"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "创建时间(毫秒时间戳)"
+          },
+          "updated_at": {
+            "type": "integer",
+            "description": "更新时间(毫秒时间戳)"
+          }
+        }
+      },
+      "UserPoint": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "内部主键"
+          },
+          "user_uuid": {
+            "type": "string",
+            "description": "用户UUID"
+          },
+          "point_value": {
+            "type": "number",
+            "description": "积分值"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "创建时间(毫秒时间戳)"
+          },
+          "updated_at": {
+            "type": "integer",
+            "description": "更新时间(毫秒时间戳)"
+          }
+        }
+      },
+      "Work": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "内部主键"
+          },
+          "work_id": {
+            "type": "string",
+            "description": "作品ID"
+          },
+          "user_uuid": {
+            "type": "string",
+            "description": "用户UUID"
+          },
+          "result_info": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "作品成果信息"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "NOT_MADE",
+              "MAKING",
+              "COMPLETED",
+              "FAILED",
+              "DELETED"
+            ],
+            "description": "作品状态"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "作品标签"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "创建时间(毫秒时间戳)"
+          },
+          "updated_at": {
+            "type": "integer",
+            "description": "更新时间(毫秒时间戳)"
+          }
+        }
+      },
+      "Collection": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "内部主键"
+          },
+          "user_uuid": {
+            "type": "string",
+            "description": "用户UUID"
+          },
+          "work_id": {
+            "type": "string",
+            "description": "作品ID"
+          },
+          "collection_type": {
+            "type": "string",
+            "enum": [
+              "VIDEO",
+              "IMAGE",
+              "MODEL",
+              "PROMPT",
+              "OTHER"
+            ],
+            "description": "收藏类型"
+          },
+          "is_collected": {
+            "type": "integer",
+            "description": "是否收藏(0-未收藏,1-已收藏)"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "创建时间(毫秒时间戳)"
+          },
+          "updated_at": {
+            "type": "integer",
+            "description": "更新时间(毫秒时间戳)"
+          }
+        }
+      },
+      "Creation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "内部主键"
+          },
+          "user_uuid": {
+            "type": "string",
+            "description": "用户UUID"
+          },
+          "creation_id": {
+            "type": "string",
+            "description": "作品ID"
+          },
+          "points_consumed": {
+            "type": "number",
+            "description": "消耗积分值"
+          },
+          "models": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "模型信息"
+          },
+          "content": {
+            "type": "string",
+            "description": "创造文本内容"
+          },
+          "extra_info": {
+            "type": "string",
+            "description": "其他信息"
+          },
+          "creation_type": {
+            "type": "string",
+            "enum": [
+              "TEXT",
+              "VIDEO",
+              "COPYWRITING",
+              "OTHER"
+            ],
+            "description": "创作类型"
+          },
+          "time_tag": {
+            "type": "string",
+            "description": "时间标签"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "QUEUING",
+              "CREATING",
+              "COMPLETED",
+              "CANCELED",
+              "INVALID"
+            ],
+            "description": "作品状态"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "创建时间(毫秒时间戳)"
+          },
+          "updated_at": {
+            "type": "integer",
+            "description": "更新时间(毫秒时间戳)"
+          }
+        }
+      },
+      "Queue": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "内部主键"
+          },
+          "work_id": {
+            "type": "string",
+            "description": "作品ID"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CREATING",
+              "FAILED"
+            ],
+            "description": "制造状态"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "创建时间(毫秒时间戳)"
+          },
+          "updated_at": {
+            "type": "integer",
+            "description": "更新时间(毫秒时间戳)"
+          }
+        }
+      },
+      "UserMaterialUpload": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "内部主键"
+          },
+          "user_uuid": {
+            "type": "string",
+            "description": "用户UUID"
+          },
+          "material_address": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "素材地址"
+          },
+          "request_id": {
+            "type": "string",
+            "description": "请求ID"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "创建时间(毫秒时间戳)"
+          },
+          "updated_at": {
+            "type": "integer",
+            "description": "更新时间(毫秒时间戳)"
+          }
+        }
+      },
+      "AIModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "内部主键"
+          },
+          "model_name": {
+            "type": "string",
+            "description": "大模型名称"
+          },
+          "model_type": {
+            "type": "string",
+            "enum": [
+              "TEXT_TO_IMAGE",
+              "IMAGE_TO_IMAGE",
+              "TEXT_TO_VIDEO",
+              "IMAGE_TO_VIDEO",
+              "TEXT_TO_TEXT",
+              "OTHER"
+            ],
+            "description": "大模型类型"
+          },
+          "config_info": {
+            "type": "object",
+            "description": "大模型配置信息"
+          },
+          "workflow": {
+            "type": "string",
+            "description": "工作流名称"
+          },
+          "is_deleted": {
+            "type": "integer",
+            "description": "软删除标记(0-未删除,1-已删除)"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "创建时间(毫秒时间戳)"
+          },
+          "updated_at": {
+            "type": "integer",
+            "description": "更新时间(毫秒时间戳)"
+          }
+        }
+      },
+      "Production": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "生产ID"
+          },
+          "queue_id": {
+            "type": "string",
+            "description": "队列ID"
+          },
+          "work_id": {
+            "type": "string",
+            "description": "作品ID"
+          },
+          "status": {
+            "type": "string",
+            "description": "生产状态",
+            "enum": [
+              "PRODUCING",
+              "COMPLETED",
+              "FAILED"
+            ]
+          },
+          "is_deleted": {
+            "type": "integer",
+            "description": "软删除标记(0-未删除,1-已删除)"
+          },
+          "created_at": {
+            "type": "integer",
+            "description": "创建时间"
+          },
+          "updated_at": {
+            "type": "integer",
+            "description": "更新时间"
+          }
+        },
+        "description": "生产表 - 存储生产过程中的状态信息"
+      },
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "integer",
+            "description": "状态码"
+          },
+          "message": {
+            "type": "string",
+            "description": "消息"
+          }
+        }
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "内部主键"
+              },
+              "uuid": {
+                "type": "string",
+                "description": "用户唯一标识(UUID)"
+              },
+              "phone": {
+                "type": "string",
+                "description": "手机号"
+              },
+              "account": {
+                "type": "string",
+                "description": "用户账号"
+              },
+              "password_hash": {
+                "type": "string",
+                "description": "密码(SHA-256加密)"
+              },
+              "email": {
+                "type": "string",
+                "description": "邮箱"
+              },
+              "avatar": {
+                "type": "string",
+                "description": "头像URL"
+              },
+              "user_type": {
+                "type": "string",
+                "description": "用户类型"
+              },
+              "extra_info": {
+                "type": "string",
+                "description": "其他信息"
+              },
+              "is_deleted": {
+                "type": "integer",
+                "description": "软删除标记"
+              },
+              "created_at": {
+                "type": "integer",
+                "description": "创建时间(毫秒时间戳)"
+              },
+              "updated_at": {
+                "type": "integer",
+                "description": "更新时间(毫秒时间戳)"
+              }
+            }
+          }
+        }
+      },
+      "UserListResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "list": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "内部主键"
+                    },
+                    "uuid": {
+                      "type": "string",
+                      "description": "用户唯一标识(UUID)"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "description": "手机号"
+                    },
+                    "account": {
+                      "type": "string",
+                      "description": "用户账号"
+                    },
+                    "password_hash": {
+                      "type": "string",
+                      "description": "密码(SHA-256加密)"
+                    },
+                    "email": {
+                      "type": "string",
+                      "description": "邮箱"
+                    },
+                    "avatar": {
+                      "type": "string",
+                      "description": "头像URL"
+                    },
+                    "user_type": {
+                      "type": "string",
+                      "description": "用户类型"
+                    },
+                    "extra_info": {
+                      "type": "string",
+                      "description": "其他信息"
+                    },
+                    "is_deleted": {
+                      "type": "integer",
+                      "description": "软删除标记"
+                    },
+                    "created_at": {
+                      "type": "integer",
+                      "description": "创建时间(毫秒时间戳)"
+                    },
+                    "updated_at": {
+                      "type": "integer",
+                      "description": "更新时间(毫秒时间戳)"
+                    }
+                  }
+                }
+              },
+              "total": {
+                "type": "integer"
+              },
+              "page": {
+                "type": "integer"
+              },
+              "page_size": {
+                "type": "integer"
+              },
+              "pages": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "SystemConfigResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "内部主键"
+              },
+              "config_key": {
+                "type": "string",
+                "description": "配置键"
+              },
+              "config_value": {
+                "type": "string",
+                "description": "配置值"
+              },
+              "config_type": {
+                "type": "string",
+                "description": "配置类型"
+              },
+              "description": {
+                "type": "string",
+                "description": "配置描述"
+              },
+              "is_public": {
+                "type": "boolean",
+                "description": "是否公开给前端"
+              },
+              "created_at": {
+                "type": "integer",
+                "description": "创建时间(毫秒时间戳)"
+              },
+              "updated_at": {
+                "type": "integer",
+                "description": "更新时间(毫秒时间戳)"
+              }
+            }
+          }
+        }
+      },
+      "SystemConfigListResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "list": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "内部主键"
+                    },
+                    "config_key": {
+                      "type": "string",
+                      "description": "配置键"
+                    },
+                    "config_value": {
+                      "type": "string",
+                      "description": "配置值"
+                    },
+                    "config_type": {
+                      "type": "string",
+                      "description": "配置类型"
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "配置描述"
+                    },
+                    "is_public": {
+                      "type": "boolean",
+                      "description": "是否公开给前端"
+                    },
+                    "created_at": {
+                      "type": "integer",
+                      "description": "创建时间(毫秒时间戳)"
+                    },
+                    "updated_at": {
+                      "type": "integer",
+                      "description": "更新时间(毫秒时间戳)"
+                    }
+                  }
+                }
+              },
+              "total": {
+                "type": "integer"
+              },
+              "page": {
+                "type": "integer"
+              },
+              "page_size": {
+                "type": "integer"
+              },
+              "pages": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "PointResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "内部主键"
+              },
+              "user_uuid": {
+                "type": "string",
+                "description": "用户UUID"
+              },
+              "point_value": {
+                "type": "number",
+                "description": "积分值"
+              },
+              "created_at": {
+                "type": "integer",
+                "description": "创建时间(毫秒时间戳)"
+              },
+              "updated_at": {
+                "type": "integer",
+                "description": "更新时间(毫秒时间戳)"
+              }
+            }
+          }
+        }
+      },
+      "PointListResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "list": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "内部主键"
+                    },
+                    "user_uuid": {
+                      "type": "string",
+                      "description": "用户UUID"
+                    },
+                    "point_value": {
+                      "type": "number",
+                      "description": "积分值"
+                    },
+                    "created_at": {
+                      "type": "integer",
+                      "description": "创建时间(毫秒时间戳)"
+                    },
+                    "updated_at": {
+                      "type": "integer",
+                      "description": "更新时间(毫秒时间戳)"
+                    }
+                  }
+                }
+              },
+              "total": {
+                "type": "integer"
+              },
+              "page": {
+                "type": "integer"
+              },
+              "page_size": {
+                "type": "integer"
+              },
+              "pages": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "WorkResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "内部主键"
+              },
+              "work_id": {
+                "type": "string",
+                "description": "作品ID"
+              },
+              "user_uuid": {
+                "type": "string",
+                "description": "用户UUID"
+              },
+              "result_info": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "作品成果信息"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "NOT_MADE",
+                  "MAKING",
+                  "COMPLETED",
+                  "FAILED",
+                  "DELETED"
+                ],
+                "description": "作品状态"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "作品标签"
+              },
+              "created_at": {
+                "type": "integer",
+                "description": "创建时间(毫秒时间戳)"
+              },
+              "updated_at": {
+                "type": "integer",
+                "description": "更新时间(毫秒时间戳)"
+              }
+            }
+          }
+        }
+      },
+      "WorkListResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "list": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "内部主键"
+                    },
+                    "work_id": {
+                      "type": "string",
+                      "description": "作品ID"
+                    },
+                    "user_uuid": {
+                      "type": "string",
+                      "description": "用户UUID"
+                    },
+                    "result_info": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "作品成果信息"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "NOT_MADE",
+                        "MAKING",
+                        "COMPLETED",
+                        "FAILED",
+                        "DELETED"
+                      ],
+                      "description": "作品状态"
+                    },
+                    "tags": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "作品标签"
+                    },
+                    "created_at": {
+                      "type": "integer",
+                      "description": "创建时间(毫秒时间戳)"
+                    },
+                    "updated_at": {
+                      "type": "integer",
+                      "description": "更新时间(毫秒时间戳)"
+                    }
+                  }
+                }
+              },
+              "total": {
+                "type": "integer"
+              },
+              "page": {
+                "type": "integer"
+              },
+              "page_size": {
+                "type": "integer"
+              },
+              "pages": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "CollectionResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "内部主键"
+              },
+              "user_uuid": {
+                "type": "string",
+                "description": "用户UUID"
+              },
+              "work_id": {
+                "type": "string",
+                "description": "作品ID"
+              },
+              "collection_type": {
+                "type": "string",
+                "enum": [
+                  "VIDEO",
+                  "IMAGE",
+                  "MODEL",
+                  "PROMPT",
+                  "OTHER"
+                ],
+                "description": "收藏类型"
+              },
+              "is_collected": {
+                "type": "integer",
+                "description": "是否收藏(0-未收藏,1-已收藏)"
+              },
+              "created_at": {
+                "type": "integer",
+                "description": "创建时间(毫秒时间戳)"
+              },
+              "updated_at": {
+                "type": "integer",
+                "description": "更新时间(毫秒时间戳)"
+              }
+            }
+          }
+        }
+      },
+      "CollectionListResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "list": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "内部主键"
+                    },
+                    "user_uuid": {
+                      "type": "string",
+                      "description": "用户UUID"
+                    },
+                    "work_id": {
+                      "type": "string",
+                      "description": "作品ID"
+                    },
+                    "collection_type": {
+                      "type": "string",
+                      "enum": [
+                        "VIDEO",
+                        "IMAGE",
+                        "MODEL",
+                        "PROMPT",
+                        "OTHER"
+                      ],
+                      "description": "收藏类型"
+                    },
+                    "is_collected": {
+                      "type": "integer",
+                      "description": "是否收藏(0-未收藏,1-已收藏)"
+                    },
+                    "created_at": {
+                      "type": "integer",
+                      "description": "创建时间(毫秒时间戳)"
+                    },
+                    "updated_at": {
+                      "type": "integer",
+                      "description": "更新时间(毫秒时间戳)"
+                    }
+                  }
+                }
+              },
+              "total": {
+                "type": "integer"
+              },
+              "page": {
+                "type": "integer"
+              },
+              "page_size": {
+                "type": "integer"
+              },
+              "pages": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "CreationResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "内部主键"
+              },
+              "user_uuid": {
+                "type": "string",
+                "description": "用户UUID"
+              },
+              "creation_id": {
+                "type": "string",
+                "description": "作品ID"
+              },
+              "points_consumed": {
+                "type": "number",
+                "description": "消耗积分值"
+              },
+              "models": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "模型信息"
+              },
+              "content": {
+                "type": "string",
+                "description": "创造文本内容"
+              },
+              "extra_info": {
+                "type": "string",
+                "description": "其他信息"
+              },
+              "creation_type": {
+                "type": "string",
+                "enum": [
+                  "TEXT",
+                  "VIDEO",
+                  "COPYWRITING",
+                  "OTHER"
+                ],
+                "description": "创作类型"
+              },
+              "time_tag": {
+                "type": "string",
+                "description": "时间标签"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "QUEUING",
+                  "CREATING",
+                  "COMPLETED",
+                  "CANCELED",
+                  "INVALID"
+                ],
+                "description": "作品状态"
+              },
+              "created_at": {
+                "type": "integer",
+                "description": "创建时间(毫秒时间戳)"
+              },
+              "updated_at": {
+                "type": "integer",
+                "description": "更新时间(毫秒时间戳)"
+              }
+            }
+          }
+        }
+      },
+      "CreationListResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "list": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "内部主键"
+                    },
+                    "user_uuid": {
+                      "type": "string",
+                      "description": "用户UUID"
+                    },
+                    "creation_id": {
+                      "type": "string",
+                      "description": "作品ID"
+                    },
+                    "points_consumed": {
+                      "type": "number",
+                      "description": "消耗积分值"
+                    },
+                    "models": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "模型信息"
+                    },
+                    "content": {
+                      "type": "string",
+                      "description": "创造文本内容"
+                    },
+                    "extra_info": {
+                      "type": "string",
+                      "description": "其他信息"
+                    },
+                    "creation_type": {
+                      "type": "string",
+                      "enum": [
+                        "TEXT",
+                        "VIDEO",
+                        "COPYWRITING",
+                        "OTHER"
+                      ],
+                      "description": "创作类型"
+                    },
+                    "time_tag": {
+                      "type": "string",
+                      "description": "时间标签"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "QUEUING",
+                        "CREATING",
+                        "COMPLETED",
+                        "CANCELED",
+                        "INVALID"
+                      ],
+                      "description": "作品状态"
+                    },
+                    "created_at": {
+                      "type": "integer",
+                      "description": "创建时间(毫秒时间戳)"
+                    },
+                    "updated_at": {
+                      "type": "integer",
+                      "description": "更新时间(毫秒时间戳)"
+                    }
+                  }
+                }
+              },
+              "total": {
+                "type": "integer"
+              },
+              "page": {
+                "type": "integer"
+              },
+              "page_size": {
+                "type": "integer"
+              },
+              "pages": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "QueueResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "内部主键"
+              },
+              "work_id": {
+                "type": "string",
+                "description": "作品ID"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "CREATING",
+                  "FAILED"
+                ],
+                "description": "制造状态"
+              },
+              "created_at": {
+                "type": "integer",
+                "description": "创建时间(毫秒时间戳)"
+              },
+              "updated_at": {
+                "type": "integer",
+                "description": "更新时间(毫秒时间戳)"
+              }
+            }
+          }
+        }
+      },
+      "QueueListResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "list": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "内部主键"
+                    },
+                    "work_id": {
+                      "type": "string",
+                      "description": "作品ID"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "CREATING",
+                        "FAILED"
+                      ],
+                      "description": "制造状态"
+                    },
+                    "created_at": {
+                      "type": "integer",
+                      "description": "创建时间(毫秒时间戳)"
+                    },
+                    "updated_at": {
+                      "type": "integer",
+                      "description": "更新时间(毫秒时间戳)"
+                    }
+                  }
+                }
+              },
+              "total": {
+                "type": "integer"
+              },
+              "page": {
+                "type": "integer"
+              },
+              "page_size": {
+                "type": "integer"
+              },
+              "pages": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "MaterialResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "内部主键"
+              },
+              "user_uuid": {
+                "type": "string",
+                "description": "用户UUID"
+              },
+              "material_address": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "素材地址"
+              },
+              "request_id": {
+                "type": "string",
+                "description": "请求ID"
+              },
+              "created_at": {
+                "type": "integer",
+                "description": "创建时间(毫秒时间戳)"
+              },
+              "updated_at": {
+                "type": "integer",
+                "description": "更新时间(毫秒时间戳)"
+              }
+            }
+          }
+        }
+      },
+      "MaterialListResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "list": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "内部主键"
+                    },
+                    "user_uuid": {
+                      "type": "string",
+                      "description": "用户UUID"
+                    },
+                    "material_address": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "素材地址"
+                    },
+                    "request_id": {
+                      "type": "string",
+                      "description": "请求ID"
+                    },
+                    "created_at": {
+                      "type": "integer",
+                      "description": "创建时间(毫秒时间戳)"
+                    },
+                    "updated_at": {
+                      "type": "integer",
+                      "description": "更新时间(毫秒时间戳)"
+                    }
+                  }
+                }
+              },
+              "total": {
+                "type": "integer"
+              },
+              "page": {
+                "type": "integer"
+              },
+              "page_size": {
+                "type": "integer"
+              },
+              "pages": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "AIModelResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "内部主键"
+              },
+              "model_name": {
+                "type": "string",
+                "description": "大模型名称"
+              },
+              "model_type": {
+                "type": "string",
+                "enum": [
+                  "TEXT_TO_IMAGE",
+                  "IMAGE_TO_IMAGE",
+                  "TEXT_TO_VIDEO",
+                  "IMAGE_TO_VIDEO",
+                  "TEXT_TO_TEXT",
+                  "OTHER"
+                ],
+                "description": "大模型类型"
+              },
+              "config_info": {
+                "type": "object",
+                "description": "大模型配置信息"
+              },
+              "workflow": {
+                "type": "string",
+                "description": "工作流名称"
+              },
+              "is_deleted": {
+                "type": "integer",
+                "description": "软删除标记(0-未删除,1-已删除)"
+              },
+              "created_at": {
+                "type": "integer",
+                "description": "创建时间(毫秒时间戳)"
+              },
+              "updated_at": {
+                "type": "integer",
+                "description": "更新时间(毫秒时间戳)"
+              }
+            }
+          }
+        }
+      },
+      "AIModelListResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "list": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "内部主键"
+                    },
+                    "model_name": {
+                      "type": "string",
+                      "description": "大模型名称"
+                    },
+                    "model_type": {
+                      "type": "string",
+                      "enum": [
+                        "TEXT_TO_IMAGE",
+                        "IMAGE_TO_IMAGE",
+                        "TEXT_TO_VIDEO",
+                        "IMAGE_TO_VIDEO",
+                        "TEXT_TO_TEXT",
+                        "OTHER"
+                      ],
+                      "description": "大模型类型"
+                    },
+                    "config_info": {
+                      "type": "object",
+                      "description": "大模型配置信息"
+                    },
+                    "workflow": {
+                      "type": "string",
+                      "description": "工作流名称"
+                    },
+                    "is_deleted": {
+                      "type": "integer",
+                      "description": "软删除标记(0-未删除,1-已删除)"
+                    },
+                    "created_at": {
+                      "type": "integer",
+                      "description": "创建时间(毫秒时间戳)"
+                    },
+                    "updated_at": {
+                      "type": "integer",
+                      "description": "更新时间(毫秒时间戳)"
+                    }
+                  }
+                }
+              },
+              "total": {
+                "type": "integer"
+              },
+              "page": {
+                "type": "integer"
+              },
+              "page_size": {
+                "type": "integer"
+              },
+              "pages": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "AIModelTypesResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "description": "枚举值"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "枚举名称"
+                }
+              }
+            }
+          }
+        }
+      },
+      "RechargeCreate": {
+        "type": "object",
+        "properties": {
+          "user_uuid": {
+            "type": "string",
+            "description": "用户UUID"
+          },
+          "recharge_info": {
+            "type": "string",
+            "description": "充值信息"
+          },
+          "recharge_points": {
+            "type": "integer",
+            "description": "充值积分"
+          }
+        },
+        "required": [
+          "user_uuid",
+          "recharge_info",
+          "recharge_points"
+        ]
+      },
+      "RechargeResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "充值记录ID"
+          },
+          "user_uuid": {
+            "type": "string",
+            "description": "用户UUID"
+          },
+          "recharge_info": {
+            "type": "string",
+            "description": "充值信息"
+          },
+          "recharge_points": {
+            "type": "integer",
+            "description": "充值积分"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "创建时间"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "更新时间"
+          }
+        }
+      },
+      "RechargeListRequest": {
+        "type": "object",
+        "properties": {
+          "user_uuid": {
+            "type": "string",
+            "description": "用户UUID"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码",
+            "default": 1
+          },
+          "per_page": {
+            "type": "integer",
+            "description": "每页数量",
+            "default": 10
+          }
+        }
+      },
+      "RechargeListResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RechargeResponse"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "总记录数"
+          },
+          "page": {
+            "type": "integer",
+            "description": "页码"
+          },
+          "per_page": {
+            "type": "integer",
+            "description": "每页数量"
+          }
+        }
+      },
+      "RechargeDetailRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "充值记录ID"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "RechargeDeleteRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "充值记录ID"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "string",
+            "description": "用户账号"
+          },
+          "password": {
+            "type": "string",
+            "description": "用户密码"
+          }
+        },
+        "required": [
+          "account",
+          "password"
+        ]
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "integer",
+            "description": "状态码"
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "access_token": {
+                "type": "string",
+                "description": "访问令牌"
+              },
+              "user": {
+                "type": "object",
+                "properties": {
+                  "account": {
+                    "type": "string",
+                    "description": "用户账号"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "邮箱"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "description": "手机号"
+                  },
+                  "avatar": {
+                    "type": "string",
+                    "description": "头像URL"
+                  },
+                  "user_type": {
+                    "type": "string",
+                    "description": "用户类型"
+                  },
+                  "extra_info": {
+                    "type": "string",
+                    "description": "其他信息"
+                  },
+                  "uuid": {
+                    "type": "string",
+                    "description": "用户UUID"
+                  },
+                  "created_at": {
+                    "type": "integer",
+                    "description": "创建时间"
+                  },
+                  "updated_at": {
+                    "type": "integer",
+                    "description": "更新时间"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "RefreshResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "integer",
+            "description": "状态码"
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "access_token": {
+                "type": "string",
+                "description": "新的访问令牌"
+              }
+            }
+          }
+        }
+      },
+      "LogoutResponse": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "integer",
+            "description": "状态码"
+          },
+          "message": {
+            "type": "string",
+            "description": "响应消息"
+          }
+        }
+      }
+    }
+  }
+}

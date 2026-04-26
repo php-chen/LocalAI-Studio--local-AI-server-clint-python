@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComfyUI API 客户端</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            margin-bottom: 15px;
+            color: #34495e;
+            font-size: 1.2em;
+        }
+        
+        .status-box {
+            background-color: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        
+        .workflow-list {
+            list-style: none;
+            margin-bottom: 15px;
+        }
+        
+        .workflow-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .workflow-item:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .workflow-item.active {
+            background-color: #e3f2fd;
+            font-weight: bold;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .task-status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-running {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .images-container {
+            margin-top: 20px;
+        }
+        
+        .image-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .image-item img {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        
+        .logs {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+        }
+        
+        .log-info {
+            color: #212529;
+        }
+        
+        .log-error {
+            color: #dc3545;
+        }
+        
+        .log-success {
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ComfyUI API 客户端</h1>
+        
+        <!-- 系统状态 -->
+        <div class="card">
+            <h2>系统状态</h2>
+            <div class="status-box" id="system-status">
+                <p>点击下方按钮检查 ComfyUI 状态</p>
+            </div>
+            <button onclick="checkSystemStatus()">检查状态</button>
+        </div>
+        
+        <!-- 工作流管理 -->
+        <div class="card">
+            <h2>工作流管理</h2>
+            <button onclick="loadWorkflows()">加载工作流</button>
+            <ul class="workflow-list" id="workflow-list">
+                <!-- 工作流列表将通过 JavaScript 动态添加 -->
+            </ul>
+        </div>
+        
+        <!-- 运行工作流 -->
+        <div class="card">
+            <h2>运行工作流</h2>
+            <div id="workflow-form">
+                <p>请先选择一个工作流</p>
+            </div>
+        </div>
+        
+        <!-- 任务状态 -->
+        <div class="card">
+            <h2>任务状态</h2>
+            <div id="task-status-container">
+                <p>运行工作流后将显示任务状态</p>
+            </div>
+        </div>
+        
+        <!-- 生成的图片 -->
+        <div class="card">
+            <h2>生成的图片</h2>
+            <div class="images-container" id="images-container">
+                <p>任务完成后将显示生成的图片</p>
+            </div>
+        </div>
+        
+        <!-- 日志 -->
+        <div class="card">
+            <h2>日志</h2>
+            <div class="logs" id="logs">
+                <!-- 日志将通过 JavaScript 动态添加 -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let selectedWorkflow = null;
+        let currentPromptId = null;
+        let statusCheckInterval = null;
+        
+        // 日志函数
+        function addLog(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logs.appendChild(logEntry);
+            logs.scrollTop = logs.scrollHeight;
+        }
+        
+        // 检查系统状态
+        function checkSystemStatus() {
+            addLog('检查 ComfyUI 系统状态...');
+            fetch('/api/test_comfy')
+                .then(response => response.json())
+                .then(data => {
+                    const statusBox = document.getElementById('system-status');
+                    if (data.status === 'success') {
+                        statusBox.innerHTML = `
+                            <p>ComfyUI 状态: 正常</p>
+                            <p>服务地址: ${data.comfyui_url}</p>
+                            <p>系统信息: 可用</p>
+                        `;
+                        addLog('ComfyUI 系统状态正常', 'success');
+                    } else {
+                        statusBox.innerHTML = `
+                            <p>ComfyUI 状态: 错误</p>
+                            <p>错误信息: ${data.error}</p>
+                        `;
+                        addLog(`ComfyUI 系统状态错误: ${data.error}`, 'error');
+                    }
+                })
+                .catch(error => {
+                    const statusBox = document.getElementById('system-status');
+                    statusBox.innerHTML = `
+                        <p>ComfyUI 状态: 错误</p>
+                        <p>错误信息: ${error.message}</p>
+                    `;
+                    addLog(`检查系统状态失败: ${error.message}`, 'error');
+                });
+        }
+        
+        // 加载工作流列表
+        function loadWorkflows() {
+            addLog('加载工作流列表...');
+            fetch('/api/workflows')
+                .then(response => response.json())
+                .then(data => {
+                    const workflowList = document.getElementById('workflow-list');
+                    workflowList.innerHTML = '';
+                    
+                    data.workflows.forEach(workflow => {
+                        const li = document.createElement('li');
+                        li.className = 'workflow-item';
+                        li.textContent = workflow;
+                        li.onclick = () => selectWorkflow(workflow);
+                        workflowList.appendChild(li);
+                    });
+                    
+                    addLog(`成功加载 ${data.workflows.length} 个工作流`, 'success');
+                })
+                .catch(error => {
+                    addLog(`加载工作流失败: ${error.message}`, 'error');
+                });
+        }
+        
+        // 选择工作流
+        function selectWorkflow(workflow) {
+            selectedWorkflow = workflow;
+            
+            // 更新工作流列表的选中状态
+            const workflowItems = document.querySelectorAll('.workflow-item');
+            workflowItems.forEach(item => {
+                if (item.textContent === workflow) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            
+            // 显示工作流表单
+            const workflowForm = document.getElementById('workflow-form');
+            workflowForm.innerHTML = `
+                <p>已选择工作流: <strong>${workflow}</strong></p>
+                <input type="text" id="prompt-input" placeholder="请输入提示词">
+                <input type="text" id="target-node-input" placeholder="目标节点 ID (可选)">
+                <button onclick="runWorkflow()">运行工作流</button>
+            `;
+            
+            addLog(`已选择工作流: ${workflow}`);
+        }
+        
+        // 运行工作流
+        function runWorkflow() {
+            if (!selectedWorkflow) {
+                addLog('请先选择一个工作流', 'error');
+                return;
+            }
+            
+            const promptInput = document.getElementById('prompt-input');
+            const targetNodeInput = document.getElementById('target-node-input');
+            
+            const prompt = promptInput.value.trim();
+            if (!prompt) {
+                addLog('请输入提示词', 'error');
+                return;
+            }
+            
+            addLog(`运行工作流: ${selectedWorkflow}，提示词: ${prompt}`);
+            
+            const requestData = {
+                prompt: prompt
+            };
+            
+            if (targetNodeInput.value.trim()) {
+                requestData.target_node = targetNodeInput.value.trim();
+            }
+            
+            fetch(`/api/workflow/${selectedWorkflow}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    currentPromptId = data.prompt_id;
+                    addLog(`工作流提交成功，prompt_id: ${currentPromptId}`, 'success');
+                    
+                    // 显示任务状态
+                    const taskStatusContainer = document.getElementById('task-status-container');
+                    taskStatusContainer.innerHTML = `
+                        <div class="task-status status-pending">
+                            任务已提交，正在等待处理...
+                        </div>
+                        <p>prompt_id: ${currentPromptId}</p>
+                        <button onclick="checkTaskStatus()">检查任务状态</button>
+                    `;
+                    
+                    // 自动检查任务状态
+                    startStatusCheck();
+                } else {
+                    addLog(`工作流提交失败: ${data.error}`, 'error');
+                    const taskStatusContainer = document.getElementById('task-status-container');
+                    taskStatusContainer.innerHTML = `
+                        <div class="task-status status-error">
+                            工作流提交失败: ${data.error}
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                addLog(`运行工作流失败: ${error.message}`, 'error');
+                const taskStatusContainer = document.getElementById('task-status-container');
+                taskStatusContainer.innerHTML = `
+                    <div class="task-status status-error">
+                        运行工作流失败: ${error.message}
+                    </div>
+                `;
+            });
+        }
+        
+        // 开始自动检查任务状态
+        function startStatusCheck() {
+            if (statusCheckInterval) {
+                clearInterval(statusCheckInterval);
+            }
+            
+            statusCheckInterval = setInterval(() => {
+                if (currentPromptId) {
+                    checkTaskStatus();
+                }
+            }, 3000);
+        }
+        
+        // 检查任务状态
+        function checkTaskStatus() {
+            if (!currentPromptId) {
+                addLog('请先运行工作流获取 prompt_id', 'error');
+                return;
+            }
+            
+            addLog(`检查任务状态，prompt_id: ${currentPromptId}`);
+            
+            fetch(`/api/task_status/${currentPromptId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const taskStatusContainer = document.getElementById('task-status-container');
+                    
+                    if (data.status === 'pending') {
+                        taskStatusContainer.innerHTML = `
+                            <div class="task-status status-pending">
+                                任务正在等待中，队列位置: ${data.queue_position}
+                            </div>
+                            <p>prompt_id: ${currentPromptId}</p>
+                            <button onclick="checkTaskStatus()">检查任务状态</button>
+                        `;
+                        addLog(`任务状态: 等待中，队列位置: ${data.queue_position}`);
+                    } else if (data.status === 'running') {
+                        taskStatusContainer.innerHTML = `
+                            <div class="task-status status-running">
+                                任务正在执行中...
+                            </div>
+                            <p>prompt_id: ${currentPromptId}</p>
+                            <button onclick="checkTaskStatus()">检查任务状态</button>
+                        `;
+                        addLog('任务状态: 执行中');
+                    } else if (data.status === 'completed') {
+                        // 清除自动检查
+                        if (statusCheckInterval) {
+                            clearInterval(statusCheckInterval);
+                            statusCheckInterval = null;
+                        }
+                        
+                        taskStatusContainer.innerHTML = `
+                            <div class="task-status status-completed">
+                                任务已完成
+                            </div>
+                            <p>prompt_id: ${currentPromptId}</p>
+                            <button onclick="getImages()">获取生成的图片</button>
+                        `;
+                        addLog('任务状态: 已完成', 'success');
+                        
+                        // 自动获取图片
+                        getImages();
+                    } else if (data.status === 'error') {
+                        // 清除自动检查
+                        if (statusCheckInterval) {
+                            clearInterval(statusCheckInterval);
+                            statusCheckInterval = null;
+                        }
+                        
+                        taskStatusContainer.innerHTML = `
+                            <div class="task-status status-error">
+                                任务执行失败: ${data.message}
+                            </div>
+                            <p>prompt_id: ${currentPromptId}</p>
+                        `;
+                        addLog(`任务状态: 错误 - ${data.message}`, 'error');
+                    } else {
+                        taskStatusContainer.innerHTML = `
+                            <div class="task-status status-error">
+                                任务状态未知: ${data.status}
+                            </div>
+                            <p>prompt_id: ${currentPromptId}</p>
+                            <button onclick="checkTaskStatus()">检查任务状态</button>
+                        `;
+                        addLog(`任务状态: 未知 - ${data.status}`);
+                    }
+                })
+                .catch(error => {
+                    addLog(`检查任务状态失败: ${error.message}`, 'error');
+                });
+        }
+        
+        // 获取生成的图片
+        function getImages() {
+            if (!currentPromptId) {
+                addLog('请先运行工作流获取 prompt_id', 'error');
+                return;
+            }
+            
+            addLog(`获取生成的图片，prompt_id: ${currentPromptId}`);
+            
+            fetch(`/api/image/${currentPromptId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const imagesContainer = document.getElementById('images-container');
+                    
+                    if (data.status === 'success' && data.images && data.images.length > 0) {
+                        imagesContainer.innerHTML = '';
+                        
+                        data.images.forEach(image => {
+                            const imageItem = document.createElement('div');
+                            imageItem.className = 'image-item';
+                            imageItem.innerHTML = `
+                                <p>文件名: ${image.filename}</p>
+                                <img src="${image.url}" alt="生成的图片">
+                                <p><a href="${image.url}" target="_blank">查看原图</a></p>
+                            `;
+                            imagesContainer.appendChild(imageItem);
+                        });
+                        
+                        addLog(`成功获取 ${data.images.length} 张图片`, 'success');
+                    } else {
+                        imagesContainer.innerHTML = `
+                            <p>未找到生成的图片</p>
+                        `;
+                        addLog('未找到生成的图片', 'error');
+                    }
+                })
+                .catch(error => {
+                    addLog(`获取图片失败: ${error.message}`, 'error');
+                    const imagesContainer = document.getElementById('images-container');
+                    imagesContainer.innerHTML = `
+                        <p>获取图片失败: ${error.message}</p>
+                    `;
+                });
+        }
+        
+        // 页面加载时检查系统状态
+        window.onload = function() {
+            addLog('页面加载完成，初始化系统状态检查...');
+            checkSystemStatus();
+            loadWorkflows();
+        };
+    </script>
+</body>
+</html>
