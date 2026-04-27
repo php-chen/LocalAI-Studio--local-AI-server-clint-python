@@ -1,395 +1,180 @@
-# ComfyUI API Service
 
-基于Flask的ComfyUI API服务，用于远程图像生成和工作流管理。
+&lt;div align="center"&gt;
+  &lt;h1&gt;ComfyUI API Server&lt;/h1&gt;
+  &lt;p&gt;
+    &lt;a href="README.zh-CN.md"&gt;🇨🇳 简体中文&lt;/a&gt; · 
+    &lt;a href="README.zh-TW.md"&gt;🇹🇼 繁體中文&lt;/a&gt; · 
+    &lt;a href="README.ja.md"&gt;🇯🇵 日本語&lt;/a&gt;
+  &lt;/p&gt;
+&lt;/div&gt;
 
-## 功能特性
+---
 
-- 支持配置ComfyUI服务地址
-- 提供工作流提交接口
-- 支持查询历史记录
-- 支持查询系统状态
-- 支持查看队列状态
-- 支持测试连接
-- 支持工作流管理
-- 支持任务状态查询
-- 支持历史记录查询
-- 支持图片获取
+## 📋 Project Overview
 
-## 安装
+ComfyUI API Server is a Flask-based remote control API service for ComfyUI, supporting management and monitoring of image and video generation tasks. This project provides complete workflow management, task queuing, status monitoring, and more, making it easy to integrate ComfyUI into your own applications.
 
-1. 安装依赖：
+## ✨ Key Features
+
+- 🎨 **Workflow Management** - Load, execute, and manage multiple ComfyUI workflows
+- 📊 **Task Monitoring** - Real-time query of task status (pending/running/completed)
+- 🖼️ **Media Retrieval** - Automatically fetch generated images and videos
+- 🔄 **Auto Processing** - Background script for automatic task queue polling and processing
+- 📦 **Lightweight** - Flask-based, easy to deploy and extend
+
+## 📁 Project Structure
+
+```
+comfyui-api-server/
+├── api/
+│   └── openapi.json          # OpenAPI 3.0 API documentation
+├── image/
+│   └── video/                # Video storage directory
+├── instance/
+│   └── users.db              # SQLite database
+├── workflows/                # ComfyUI workflow files directory
+│   ├── image_z_image_turbo-web.json
+│   ├── image_z_image_turbo.json
+│   └── video_wan2_2_5B_ti2v.json
+├── app.py                    # Flask main application
+├── config.py                 # Configuration management
+├── auto_processor.py         # Auto task processing script
+├── index.html                # Frontend web client
+├── apiDetails.txt            # API endpoint list
+├── requirements.txt          # Dependency list
+└── README.md                 # Project documentation
+```
+
+## 🛠️ Installation Guide
+
+### Prerequisites
+
+- Python 3.8+
+- ComfyUI service running
+- pip package manager
+
+### Installation Steps
+
+1. **Clone the project**
+
+```bash
+git clone &lt;your-repo-url&gt;
+cd comfyui-api-server
+```
+
+2. **Install dependencies**
+
 ```bash
 pip install -r requirements.txt
 ```
 
-2. 配置环境变量（创建.env文件）：
-```env
-COMFYUI_BASE_URL=http://localhost:8000
-FLASK_DEBUG=True
-FLASK_HOST=0.0.0.0
-FLASK_PORT=5000
-```
+## 🚀 Quick Start
 
-## API 端点
-
-### 1. 测试连接
-
-测试ComfyUI服务器连接状态。
-
-```http
-GET /api/test_comfy
-```
-
-响应示例：
-```json
-{
-    "status": "success",
-    "comfyui_url": "http://localhost:8188/system_stats",
-    "response": {
-        "system_stats": { ... }
-    }
-}
-```
-
-### 2. 工作流管理
-
-#### 列出所有工作流
-```http
-GET /api/workflows
-```
-
-响应示例：
-```json
-{
-    "workflows": ["sd_txt2img", "sd_img2img", "flux_test"]
-}
-```
-
-#### 运行工作流
-
-支持两种格式的工作流更新请求：
-
-#### 2.1 简单格式
-
-适用于只需要更新单个文本节点的场景。
-
-```http
-POST /api/workflow/<workflow_name>
-```
-
-请求体：
-```json
-{
-    "prompt": "your text prompt",
-    "target_node": "node_id"
-}
-```
-
-#### 2.2 高级格式
-
-适用于需要同时更新多个不同节点的场景。
-
-```http
-POST /api/workflow/<workflow_name>
-```
-
-请求体：
-```json
-{
-    "node_id1": {
-        "inputs": {
-            "text": "your text for node 1"
-        }
-    },
-    "node_id2": {
-        "inputs": {
-            "text": "your text for node 2"
-        }
-    }
-}
-```
-
-示例：同时更新提示词、标题和短语
-```json
-{
-    "58": {
-        "inputs": {
-            "text": "A young man standing in front of a building..."
-        }
-    },
-    "126": {
-        "inputs": {
-            "text": "惊喜的购物狂欢"
-        }
-    },
-    "128": {
-        "inputs": {
-            "text": "意外的礼物, 购物的快乐"
-        }
-    }
-}
-```
-
-响应示例：
-```json
-{
-    "status": "success",
-    "prompt_id": "12345",
-    "client_id": "my-api-1234567890"
-}
-```
-
-错误响应示例：
-```json
-{
-    "error": "Target node 41 is not a text input node"
-}
-```
-
-或
-```json
-{
-    "error": "No suitable text input node found in workflow"
-}
-```
-
-注意事项：
-1. 简单格式（推荐）：
-   - `prompt`: 要传入的提示语文本
-   - `target_node`: 可选，目标节点ID。如果指定，必须是工作流中存在的文本输入节点（支持 Text Multiline 或 CLIPTextEncode 类型）
-   - 如果不指定 target_node，API 会自动查找工作流中第一个合适的文本输入节点
-
-2. 高级格式：
-   - 直接指定要更新的节点ID和其输入参数
-   - 需要了解工作流的具体结构
-   - 可以同时更新多个节点的多个参数
-
-调试信息：
-- API 会在服务器终端打印完整的工作流 JSON 和发送给 ComfyUI 的请求内容
-- 格式化的日志包括：
-  1. 最终的工作流 JSON（=== Final Workflow JSON ===）
-  2. 发送给 ComfyUI 的完整请求（=== Request to ComfyUI ===）
-
-### 3. 任务状态查询
-
-#### 查询任务状态
-```http
-GET /api/task_status/<prompt_id>
-```
-
-可能的响应状态：
-
-1. 等待中：
-```json
-{
-    "status": "pending",
-    "message": "Task is waiting in queue",
-    "queue_position": 1
-}
-```
-
-2. 执行中：
-```json
-{
-    "status": "running",
-    "message": "Task is currently running",
-    "execution_info": { ... }
-}
-```
-
-3. 已完成：
-```json
-{
-    "status": "completed",
-    "message": "Image generation completed",
-    "images": [
-        {
-            "url": "http://localhost:8188/view?filename=xxx.png",
-            "filename": "xxx.png",
-            "subfolder": "",
-            "type": "temp"
-        }
-    ],
-    "execution_time": 10.5,
-    "node_errors": {}
-}
-```
-
-4. 其他状态：
-- `processing`: 处理中但未生成图片
-- `not_found`: 未找到任务
-- `unknown`: 状态未知
-- `error`: 发生错误
-
-### 4. 历史记录
-
-#### 获取所有历史记录
-```http
-GET /api/history
-```
-
-#### 获取特定任务历史
-```http
-GET /api/history/<prompt_id>
-```
-
-### 5. 图片获取
-
-获取生成的图片信息：
-```http
-GET /api/image/<prompt_id>
-```
-
-响应示例：
-```json
-{
-    "status": "success",
-    "images": [
-        {
-            "url": "http://localhost:8188/view?filename=ComfyUI_00001_.png",
-            "filename": "ComfyUI_00001_.png",
-            "subfolder": "",
-            "type": "temp"
-        }
-    ]
-}
-```
-
-## 工作流参数说明
-
-工作流JSON格式：
-```json
-{
-    "1": {
-        "inputs": {
-            "text": "提示词"
-        }
-    },
-    "3": {
-        "inputs": {
-            "seed": 42,
-            "steps": 20,
-            "cfg": 7.5,
-            "sampler_name": "euler_ancestral",
-            "scheduler": "normal",
-            "denoise": 1.0
-        }
-    }
-}
-```
-
-## 错误处理
-
-所有API错误响应格式：
-```json
-{
-    "error": "错误描述",
-    "status_code": 400
-}
-```
-
-## 开发说明
-
-1. 工作流文件存放在 `workflows` 目录
-2. 支持动态参数更新
-3. 提供详细的错误信息和日志
-4. 支持异步任务状态查询
-
-## 注意事项
-
-1. 图片URL中的 `type=temp` 表示临时文件，会定期清理
-2. 建议定期查询任务状态直到完成
-3. 确保ComfyUI服务器地址配置正确
-
-## 调用流程指引
-
-### 基本工作流程
-
-```mermaid
-sequenceDiagram
-    participant Client as 客户端
-    participant API as API服务
-    participant ComfyUI as ComfyUI服务
-    
-    Client->>API: 1. GET /api/workflows
-    API-->>Client: 返回可用工作流列表
-    
-    Client->>API: 2. POST /api/workflow/{workflow_name}<br>{"prompt": "text", "target_node": "id"}
-    API->>API: 2.1 加载并更新工作流
-    API->>ComfyUI: 2.2 提交工作流
-    ComfyUI-->>API: 返回 prompt_id
-    API-->>Client: 返回 prompt_id 和状态
-    
-    Client->>API: 3. GET /api/task_status/{prompt_id}
-    API->>ComfyUI: 查询任务状态
-    ComfyUI-->>API: 返回状态信息
-    API-->>Client: 返回处理状态和结果
-```
-
-### 详细状态流转
-
-```mermaid
-stateDiagram-v2
-    [*] --> 提交工作流
-    提交工作流 --> 等待中: 进入队列
-    等待中 --> 执行中: 开始处理
-    执行中 --> 已完成: 生成成功
-    执行中 --> 错误: 生成失败
-    已完成 --> [*]
-    错误 --> [*]
-
-    state 等待中 {
-        [*] --> 队列中
-        队列中 --> 准备执行
-    }
-    
-    state 执行中 {
-        [*] --> 加载模型
-        加载模型 --> 生成图像
-        生成图像 --> 保存结果
-    }
-```
-
-### 推荐使用流程
-
-1. **准备阶段**
-   ```mermaid
-   flowchart LR
-       A[准备工作流文件] --> B[上传到 workflows 目录]
-       B --> C[确认文本输入节点 ID]
-   ```
-
-2. **调用阶段**
-   ```mermaid
-   flowchart LR
-       A[获取工作流列表] --> B[提交生成请求]
-       B --> C[轮询任务状态]
-       C --> D{状态检查}
-       D -->|完成| E[获取结果]
-       D -->|进行中| C
-       D -->|错误| F[错误处理]
-   ```
-
-### 错误处理流程
-
-```mermaid
-flowchart TD
-    A[API 调用] --> B{检查响应}
-    B -->|400| C[请求格式错误]
-    B -->|404| D[工作流不存在]
-    B -->|500| E[服务器错误]
-    B -->|200| F[调用成功]
-    
-    C --> G[检查请求格式]
-    D --> H[检查工作流文件]
-    E --> I[查看服务日志]
-    
-    G --> J[重新提交]
-    H --> J
-    I --> J
-```
-
-## 运行
+### Start API Service
 
 ```bash
 python app.py
+```
+
+Service will start at `http://localhost:5000`.
+
+### Start Auto Task Processor (Optional)
+
+```bash
+python auto_processor.py
+```
+
+This script will automatically poll the task queue and process pending tasks.
+
+## 📡 API Documentation
+
+### Main Endpoints
+
+| Endpoint | Method | Function |
+|----------|--------|----------|
+| `/api/test_comfy` | GET | Test ComfyUI connection |
+| `/api/workflows` | GET | List all workflows |
+| `/api/workflow/&lt;name&gt;` | POST | Run specified workflow |
+| `/api/history` | GET | Get all history records |
+| `/api/history/&lt;prompt_id&gt;` | GET | Get specified task history |
+| `/api/image/&lt;prompt_id&gt;` | GET | Get generated images/videos |
+| `/api/status` | GET | Get system status |
+| `/api/view_queue` | GET | View queue status |
+| `/api/task_status/&lt;prompt_id&gt;` | GET | Check task status |
+
+### API Usage Examples
+
+**Test Connection**
+
+```bash
+curl http://localhost:5000/api/test_comfy
+```
+
+**Get Workflow List**
+
+```bash
+curl http://localhost:5000/api/workflows
+```
+
+**Run Workflow**
+
+```bash
+curl -X POST http://localhost:5000/api/workflow/image_z_image_turbo \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "a beautiful sunset over the ocean"}'
+```
+
+**Check Task Status**
+
+```bash
+curl http://localhost:5000/api/task_status/&lt;prompt_id&gt;
+```
+
+**Get Generated Images**
+
+```bash
+curl http://localhost:5000/api/image/&lt;prompt_id&gt;
+```
+
+## 📝 Workflow Usage
+
+### Adding Workflows
+
+1. Create or export your workflow in ComfyUI
+2. Save the workflow JSON file to the `workflows/` directory
+3. Ensure there's a text node in the workflow for prompt input (supports `Text Multiline` or `CLIPTextEncode` types)
+4. Set the text node content to `ChangeThisContent` in the workflow (for automatic replacement)
+
+### Running Workflows
+
+Use POST request to call `/api/workflow/&lt;name&gt;` and pass the `prompt` parameter.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork this repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [ComfyUI](https://github.com/comfyanonymous/ComfyUI) - Powerful node-based AI image generation tool
+- [Flask](https://flask.palletsprojects.com/) - Lightweight web framework
+
+---
+
+&lt;div align="center"&gt;
+  &lt;p&gt;
+    &lt;a href="README.zh-CN.md"&gt;🇨🇳 简体中文&lt;/a&gt; · 
+    &lt;a href="README.zh-TW.md"&gt;🇹🇼 繁體中文&lt;/a&gt; · 
+    &lt;a href="README.ja.md"&gt;🇯🇵 日本語&lt;/a&gt;
+  &lt;/p&gt;
+&lt;/div&gt;
+
