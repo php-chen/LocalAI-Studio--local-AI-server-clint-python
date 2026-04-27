@@ -1,12 +1,7 @@
 
-&lt;div align="center"&gt;
-  &lt;h1&gt;ComfyUI API Server&lt;/h1&gt;
-  &lt;p&gt;
-    &lt;a href="README.md"&gt;🇺🇸 English&lt;/a&gt; · 
-    &lt;a href="README.zh-CN.md"&gt;🇨🇳 简体中文&lt;/a&gt; · 
-    &lt;a href="README.zh-TW.md"&gt;🇹🇼 繁體中文&lt;/a&gt;
-  &lt;/p&gt;
-&lt;/div&gt;
+# ComfyUI API Server
+
+[🇺🇸 English](README.md) · [🇨🇳 简体中文](README.zh-CN.md) · [🇹🇼 繁體中文](README.zh-TW.md)
 
 ---
 
@@ -170,11 +165,5 @@ POST リクエストで `/api/workflow/&lt;name&gt;` を呼び出し、`prompt` 
 
 ---
 
-&lt;div align="center"&gt;
-  &lt;p&gt;
-    &lt;a href="README.md"&gt;🇺🇸 English&lt;/a&gt; · 
-    &lt;a href="README.zh-CN.md"&gt;🇨🇳 简体中文&lt;/a&gt; · 
-    &lt;a href="README.zh-TW.md"&gt;🇹🇼 繁體中文&lt;/a&gt;
-  &lt;/p&gt;
-&lt;/div&gt;
+[🇺🇸 English](README.md) · [🇨🇳 简体中文](README.zh-CN.md) · [🇹🇼 繁體中文](README.zh-TW.md)
 

@@ -1,12 +1,7 @@
 
-&lt;div align="center"&gt;
-  &lt;h1&gt;ComfyUI API Server&lt;/h1&gt;
-  &lt;p&gt;
-    &lt;a href="README.zh-CN.md"&gt;🇨🇳 简体中文&lt;/a&gt; · 
-    &lt;a href="README.zh-TW.md"&gt;🇹🇼 繁體中文&lt;/a&gt; · 
-    &lt;a href="README.ja.md"&gt;🇯🇵 日本語&lt;/a&gt;
-  &lt;/p&gt;
-&lt;/div&gt;
+# ComfyUI API Server
+
+[🇨🇳 简体中文](README.zh-CN.md) · [🇹🇼 繁體中文](README.zh-TW.md) · [🇯🇵 日本語](README.ja.md)
 
 ---
 

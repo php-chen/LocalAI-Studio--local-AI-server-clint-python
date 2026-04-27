@@ -1,12 +1,7 @@
 
-&lt;div align="center"&gt;
-  &lt;h1&gt;ComfyUI API Server&lt;/h1&gt;
-  &lt;p&gt;
-    &lt;a href="README.md"&gt;🇺🇸 English&lt;/a&gt; · 
-    &lt;a href="README.zh-CN.md"&gt;🇨🇳 简体中文&lt;/a&gt; · 
-    &lt;a href="README.ja.md"&gt;🇯🇵 日本語&lt;/a&gt;
-  &lt;/p&gt;
-&lt;/div&gt;
+# ComfyUI API Server
+
+[🇺🇸 English](README.md) · [🇨🇳 简体中文](README.zh-CN.md) · [🇯🇵 日本語](README.ja.md)
 
 ---
 
@@ -170,11 +165,5 @@ curl http://localhost:5000/api/image/&lt;prompt_id&gt;
 
 ---
 
-&lt;div align="center"&gt;
-  &lt;p&gt;
-    &lt;a href="README.md"&gt;🇺🇸 English&lt;/a&gt; · 
-    &lt;a href="README.zh-CN.md"&gt;🇨🇳 简体中文&lt;/a&gt; · 
-    &lt;a href="README.ja.md"&gt;🇯🇵 日本語&lt;/a&gt;
-  &lt;/p&gt;
-&lt;/div&gt;
+[🇺🇸 English](README.md) · [🇨🇳 简体中文](README.zh-CN.md) · [🇯🇵 日本語](README.ja.md)
 
