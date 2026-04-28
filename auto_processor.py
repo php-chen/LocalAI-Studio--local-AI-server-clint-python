@@ -36,8 +36,9 @@ class ComfyUIConfig:
 
 class APIConfig:
     """API服务器配置"""
-    API_BASE_URL = "http://localhost:5000"
-
+    # API_BASE_URL = "http://localhost:5000" # dev
+    API_BASE_URL = "http://103.236.97.248:60490" # prod 103.236.97.248:60490
+    
 class ComfyUIClient:
     """ComfyUI客户端"""
 
